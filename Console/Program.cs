@@ -8,7 +8,7 @@ namespace Console
         public const string Config = "Brian";
         static void Main(string[] args)
         {
-            WriteLine(Day2.PartB());
+            WriteLine(Day3.PartB());
         }
     }
 }
