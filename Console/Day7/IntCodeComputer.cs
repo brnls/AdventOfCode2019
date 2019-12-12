@@ -7,12 +7,21 @@ namespace Console.Day7
 {
     class IntCodeComputer
     {
+        public IntCodeComputer(int[] instructions, int initialInput)
+        {
+            Input = new Queue<int>();
+            Input.Enqueue(initialInput);
+            Output = new Queue<int>();
+            Instructions = instructions;
+        }
         public int Offset { get; set; } = 0;
         public int[] Instructions { get; set; }
         public bool Complete { get; private set; } = false;
-        public int Output { get; set; }
+        public Queue<int> Output { get; }
+        public Queue<int> Input { get; }
+        public int LastOutput { get; set;  }
 
-        public List<int> Run(Queue<int> inputs)
+        public List<int> Run()
         {
             var results = new List<int>();
             while (Offset < Instructions.Length)
@@ -30,13 +39,14 @@ namespace Console.Day7
                 }
                 else if (instruction.OpCode == OpCode.Save)
                 {
-                    Instructions[Instructions[Offset + 1]] = inputs.Dequeue();
+                    Instructions[Instructions[Offset + 1]] = Input.Dequeue();
                     Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.Read)
                 {
                     results.Add(instruction.First.GetValue(Instructions, Offset + 1));
-                    Output = results[0];
+                    Output.Enqueue(results[0]);
+                    LastOutput = results[0];
                     Offset += instruction.Size;
                     break;
                 }

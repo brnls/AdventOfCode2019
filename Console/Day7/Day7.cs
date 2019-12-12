@@ -19,7 +19,7 @@ namespace Console.Day7
         }
         public static int PartB()
         {
-            var list = new[] { 9,8,7,6,5 };
+            var list = new[] { 5,6,7,8,9 };
             return AllPermutations(list)
                 .Max(x => RunAmplifiers(x.ToArray()));
         }
@@ -28,17 +28,15 @@ namespace Console.Day7
         {
             int output = 0;
             int index = 0;
-            IntCodeComputer[] computers = Enumerable.Range(0, amplifiers.Length)
-                .Select(_ => new IntCodeComputer { Instructions = ReadOpCodes.ToArray() }).ToArray();
+            IntCodeComputer[] computers = amplifiers
+                .Select(i => new IntCodeComputer(instructions:ReadOpCodes.ToArray(), initialInput: i)).ToArray();
 
             while(true)
             {
-                var inputs = new Queue<int>();
-                inputs.Enqueue(amplifiers[index]);
-                inputs.Enqueue(output);
-                var result = computers[index].Run(inputs);
-                if (computers[index].Complete) return computers[^1].Output;
-                output = result[0];
+                computers[index].Input.Enqueue(output);
+                var result = computers[index].Run();
+                if (computers[index].Complete) return computers[^1].LastOutput;
+                output = computers[index].Output.Dequeue();
                 index = (index + 1) % amplifiers.Length;
             }
 
