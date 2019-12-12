@@ -2,29 +2,47 @@
 using System.IO;
 using System.Linq;
 
-namespace Console
+namespace Console.Day7
 {
-    class Day7
+    class Problem
     {
-        static (string, string)[] Orbits = File.ReadAllLines($"Day6/{Program.Config}Day6.txt")
-            .Select(x =>
-            {
-                var split = x.Split(')');
-                return (split[0], split[1]);
-            }).ToArray();
+        static int[] ReadOpCodes = File.ReadAllText($"Day7/{Program.Config}Day7.txt")
+            .Split(',')
+            .Select(int.Parse)
+            .ToArray();
 
-        public static void PartA()
+        public static int PartA()
         {
-            var list = new[] { 1, 2, 3, 4, 5};
+            var list = new[] { 0, 1, 2, 3, 4, };
+            return AllPermutations(list)
+                .Max(x => RunAmplifiers(x.ToArray()));
+        }
+        public static int PartB()
+        {
+            var list = new[] { 9,8,7,6,5 };
+            return AllPermutations(list)
+                .Max(x => RunAmplifiers(x.ToArray()));
+        }
 
-            foreach (var p in AllPermutations(list))
+        static int RunAmplifiers(int[] amplifiers)
+        {
+            int output = 0;
+            int index = 0;
+            IntCodeComputer[] computers = Enumerable.Range(0, amplifiers.Length)
+                .Select(_ => new IntCodeComputer { Instructions = ReadOpCodes.ToArray() }).ToArray();
+
+            while(true)
             {
-                foreach (var val in p)
-                {
-                    System.Console.WriteLine(val);
-                }
-                System.Console.WriteLine("---------------------");
+                var inputs = new Queue<int>();
+                inputs.Enqueue(amplifiers[index]);
+                inputs.Enqueue(output);
+                var result = computers[index].Run(inputs);
+                if (computers[index].Complete) return computers[^1].Output;
+                output = result[0];
+                index = (index + 1) % amplifiers.Length;
             }
+
+            return output;
         }
 
         static IEnumerable<IEnumerable<T>> AllPermutations<T>(T[] list)
@@ -82,5 +100,10 @@ namespace Console
             }
         }
 
+        class State
+        {
+            public int InstructionOffset { get; set; }
+            public int[] Memory { get; set; }
+        }
     }
 }
