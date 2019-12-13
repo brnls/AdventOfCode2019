@@ -5,10 +5,10 @@ namespace Console
 {
     class Program
     {
-        public const string Config = "Brian";
+        public const string Config = "Alli";
         static void Main(string[] args)
         {
-            Day8.Problem.PartB();
+            WriteLine(Day9.Problem.PartA());
         }
     }
 }
