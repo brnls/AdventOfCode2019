@@ -5,7 +5,7 @@ namespace Console
 {
     class Program
     {
-        public const string Config = "Alli";
+        public const string Config = "Brian";
         static void Main(string[] args)
         {
             WriteLine(Day9.Problem.PartA());

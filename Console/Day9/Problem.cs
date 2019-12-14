@@ -14,7 +14,8 @@ namespace Console.Day9
         public static long PartA()
         {
             var intComputer = new IntCodeComputer(ReadOpCodes.Concat(new long[10000]).ToArray(), 1);
-            return intComputer.Run()[0];
+            intComputer.Run();
+            return intComputer.Output.Dequeue();
         }
 
         public static void PartB()

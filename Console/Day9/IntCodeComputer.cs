@@ -48,9 +48,9 @@ namespace Console.Day9
                 }
                 else if (instruction.OpCode == OpCode.Read)
                 {
-                    results.Add(instruction.First.GetValue(Instructions, Offset + 1, _relativeBase));
-                    Output.Enqueue(results[0]);
-                    LastOutput = results[0];
+                    var output = instruction.First.GetValue(Instructions, Offset + 1, _relativeBase);
+                    Output.Enqueue(output);
+                    LastOutput = output;
                     Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.JumpTrue)
