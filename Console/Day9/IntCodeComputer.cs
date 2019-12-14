@@ -12,80 +12,99 @@ namespace Console.Day9
             Input = new Queue<long>();
             Input.Enqueue(initialInput);
             Output = new Queue<long>();
-            Instructions = instructions;
+            Memory = instructions;
         }
 
         public long Offset { get; set; } = 0;
-        public long[] Instructions { get; set; }
+        public long[] Memory { get; set; }
         public bool Complete { get; private set; } = false;
         public Queue<long> Output { get; }
         public Queue<long> Input { get; }
         public long LastOutput { get; set;  }
         private long _relativeBase = 0;
 
+        long GetAddress(ParameterMode mode, long parameterOffset)
+        {
+            return mode switch
+            {
+                ParameterMode.Immediate => parameterOffset,
+                ParameterMode.Position => Memory[parameterOffset],
+                ParameterMode.Relative => Memory[parameterOffset] + _relativeBase 
+            };
+        }
+
+        long GetAddress(Instruction instruction, long offset)
+        {
+            return offset switch
+            {
+                1 => GetAddress(instruction.First, Offset + 1),
+                2 => GetAddress(instruction.Second, Offset + 2),
+                3 => GetAddress(instruction.Third, Offset + 3),
+                _ => throw new Exception("bad offset")
+            };
+        }
+
         public List<long> Run()
         {
             var results = new List<long>();
-            while (Offset < Instructions.Length)
+            while (Offset < Memory.Length)
             {
-                var instruction = Instruction.ParseInstruction(Instructions, Offset);
+                var instruction = Instruction.ParseInstruction(Memory, Offset);
+                long paramAddress(long offset) => GetAddress(instruction, offset);
+
                 if (instruction.OpCode == OpCode.Add)
                 {
-                    Instructions[Instructions[Offset + 3]] = instruction.First.GetValue(Instructions, Offset + 1, _relativeBase) + 
-                        instruction.Second.GetValue(Instructions, Offset + 2, _relativeBase);
+                    Memory[paramAddress(3)] = Memory[paramAddress(1)] + Memory[paramAddress(2)];
                     Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.Multiply)
                 {
-                    Instructions[Instructions[Offset + 3]] = instruction.First.GetValue(Instructions, Offset + 1, _relativeBase) * 
-                        instruction.Second.GetValue(Instructions, Offset + 2, _relativeBase);
+                    Memory[paramAddress(3)] = Memory[paramAddress(1)] * Memory[paramAddress(2)];
                     Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.Save)
                 {
-                    Instructions[Instructions[Offset + 1]] = Input.Dequeue();
+                    Memory[paramAddress(1)] = Input.Dequeue();
                     Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.Read)
                 {
-                    var output = instruction.First.GetValue(Instructions, Offset + 1, _relativeBase);
+                    var output = Memory[paramAddress(1)];
                     Output.Enqueue(output);
                     LastOutput = output;
                     Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.JumpTrue)
                 {
-                    if (instruction.First.GetValue(Instructions, Offset + 1, _relativeBase) != 0)
-                        Offset = instruction.Second.GetValue(Instructions, Offset + 2, _relativeBase);
+                    if (Memory[paramAddress(1)] != 0)
+                        Offset = Memory[paramAddress(2)];
                     else Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.JumpFalse)
                 {
-                    if (instruction.First.GetValue(Instructions, Offset + 1, _relativeBase) == 0)
-                        Offset = instruction.Second.GetValue(Instructions, Offset + 2, _relativeBase);
+                    if (Memory[paramAddress(1)] == 0)
+                        Offset = Memory[paramAddress(2)];
                     else Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.LessThan)
                 {
-                    if (instruction.First.GetValue(Instructions, Offset + 1, _relativeBase) < 
-                        instruction.Second.GetValue(Instructions, Offset + 2, _relativeBase))
-                        Instructions[Instructions[Offset + 3]] = 1;
-                    else Instructions[Instructions[Offset + 3]] = 0;
+                    if (Memory[paramAddress(1)] < Memory[paramAddress(2)])
+                        Memory[paramAddress(3)] = 1;
+                    else Memory[paramAddress(3)] = 0;
 
                     Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.Equals)
                 {
-                    if (instruction.First.GetValue(Instructions, Offset + 1, _relativeBase) == 
-                        instruction.Second.GetValue(Instructions, Offset + 2, _relativeBase))
-                        Instructions[Instructions[Offset + 3]] = 1;
-                    else Instructions[Instructions[Offset + 3]] = 0;
+                    if (Memory[paramAddress(1)] == Memory[paramAddress(2)])
+                        Memory[paramAddress(3)] = 1;
+                    else Memory[paramAddress(3)] = 0;
 
                     Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.AdjustRelativeBase)
                 {
-                    _relativeBase += instruction.First.GetValue(Instructions, Offset + 1, _relativeBase);
+                    _relativeBase += Memory[paramAddress(1)];
                     Offset += instruction.Size;
                 }
                 else if (instruction.OpCode == OpCode.Break)
@@ -139,9 +158,9 @@ namespace Console.Day9
     public class Instruction
     {
         public OpCode OpCode { get; set; }
-        public Parameter First { get; set; }
-        public Parameter Second { get; set; }
-        public Parameter Third { get; set; }
+        public ParameterMode First { get; set; }
+        public ParameterMode Second { get; set; }
+        public ParameterMode Third { get; set; }
         public long Size => OpCode switch
         {
             OpCode.Save => 2,
@@ -155,6 +174,14 @@ namespace Console.Day9
             OpCode.Multiply => 4,
             _ => throw new Exception($"invalid opcode {OpCode}")
         };
+
+        public long GetAddress(ParameterMode mode, long[] opCodes, long offset, long currentRelativeBase) =>
+            mode switch
+            {
+                ParameterMode.Immediate => offset,
+                ParameterMode.Position => opCodes[offset],
+                ParameterMode.Relative => opCodes[offset]+currentRelativeBase 
+            };
 
         public static Instruction ParseInstruction(long[] instructions, long offset)
         {
@@ -171,37 +198,9 @@ namespace Console.Day9
             return new Instruction
             {
                 OpCode = (OpCode)opCode,
-                First = GetParameterCount((OpCode)opCode) >= 1 ?
-                    new Parameter { Mode = first, Value = instructions[offset + 1] }
-                    : null ,
-                Second = GetParameterCount((OpCode)opCode) >= 2 ?
-                    new Parameter { Mode = second, Value = instructions[offset + 2] }
-                    : null,
-                Third = GetParameterCount((OpCode)opCode) >= 3 ?
-                    new Parameter { Mode = third, Value = instructions[offset + 3] }
-                    : null,
-            };
-        }
-
-        public static long GetParameterCount(OpCode opCode)
-        {
-            return opCode switch
-            {
-                var c when
-                    c == OpCode.Break => 0,
-                var c when
-                    c == OpCode.Save ||
-                    c == OpCode.AdjustRelativeBase ||
-                    c == OpCode.Read => 1,
-                var c when
-                    c == OpCode.JumpFalse ||
-                    c == OpCode.JumpTrue => 2,
-                var c when
-                    c == OpCode.Multiply ||
-                    c == OpCode.Add ||
-                    c == OpCode.LessThan ||
-                    c == OpCode.Equals => 3,
-                _ => throw new Exception($"unhandled op code: {opCode}")
+                First = first,
+                Second = second,
+                Third = third
             };
         }
 
@@ -211,19 +210,5 @@ namespace Console.Day9
                 throw new Exception($"Invalid parameter mode: {mode}");
             return (ParameterMode)mode;
         }
-    }
-
-    public class Parameter
-    {
-        public ParameterMode Mode { get; set; }
-        public long Value { get; set; }
-
-        public long GetValue(long[] opCodes, long offset, long currentRelativeBase) =>
-            Mode switch
-            {
-                ParameterMode.Immediate => Value,
-                ParameterMode.Position => opCodes[opCodes[offset]],
-                ParameterMode.Relative => opCodes[opCodes[offset]+currentRelativeBase] 
-            };
     }
 }

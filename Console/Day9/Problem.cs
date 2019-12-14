@@ -18,9 +18,11 @@ namespace Console.Day9
             return intComputer.Output.Dequeue();
         }
 
-        public static void PartB()
+        public static string PartB()
         {
-
+            var intComputer = new IntCodeComputer(ReadOpCodes.Concat(new long[10000]).ToArray(), 2);
+            intComputer.Run();
+            return $"{intComputer.Output.Dequeue()}";
         }
     }
 

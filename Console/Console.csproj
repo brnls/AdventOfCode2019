@@ -46,6 +46,9 @@
     <None Update="Day6\AlliDay6.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Day9\AlliDay8.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Day9\AlliDay9.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
