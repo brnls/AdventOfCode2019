@@ -29,7 +29,8 @@ namespace Console.Day9
             {
                 ParameterMode.Immediate => parameterOffset,
                 ParameterMode.Position => Memory[parameterOffset],
-                ParameterMode.Relative => Memory[parameterOffset] + _relativeBase 
+                ParameterMode.Relative => Memory[parameterOffset] + _relativeBase,
+                _ => throw new Exception($"bad mode {mode}")
             };
         }
 
@@ -180,7 +181,8 @@ namespace Console.Day9
             {
                 ParameterMode.Immediate => offset,
                 ParameterMode.Position => opCodes[offset],
-                ParameterMode.Relative => opCodes[offset]+currentRelativeBase 
+                ParameterMode.Relative => opCodes[offset]+currentRelativeBase,
+                _ => throw new ArgumentException($"Invalid mode {mode}")
             };
 
         public static Instruction ParseInstruction(long[] instructions, long offset)
