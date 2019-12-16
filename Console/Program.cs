@@ -8,7 +8,8 @@ namespace Console
         public const string Config = "Alli";
         static void Main(string[] args)
         {
-            WriteLine(Day9.Problem.PartB());
+            WriteLine(Day10.Problem.PartB());
+            //Day10.Problem.PartA();
         }
     }
 }
