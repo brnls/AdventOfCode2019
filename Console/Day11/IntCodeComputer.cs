@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Console.Day11
@@ -12,7 +13,7 @@ namespace Console.Day11
             Input = new Queue<long>();
             Input.Enqueue(initialInput);
             Output = new Queue<long>();
-            Memory = instructions;
+            Memory = instructions.Concat(new long[10000]).ToArray();
         }
 
         public long Offset { get; set; } = 0;

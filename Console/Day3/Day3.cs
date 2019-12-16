@@ -73,7 +73,8 @@ namespace Console
                     'U' => Direction.Up,
                     'D' => Direction.Down,
                     'L' => Direction.Left,
-                    'R' => Direction.Right
+                    'R' => Direction.Right,
+                    _ => throw new Exception()
                 };
 
             return new Vector
@@ -142,6 +143,8 @@ namespace Console
                         });
                         x = x - wire.Value;
                         break;
+                    default:
+                        throw new Exception();
                 }
             }
             return new WireSet

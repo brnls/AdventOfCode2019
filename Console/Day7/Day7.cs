@@ -39,8 +39,6 @@ namespace Console.Day7
                 output = computers[index].Output.Dequeue();
                 index = (index + 1) % amplifiers.Length;
             }
-
-            return output;
         }
 
         static IEnumerable<IEnumerable<T>> AllPermutations<T>(T[] list)

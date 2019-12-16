@@ -202,7 +202,8 @@ namespace Console
             Mode switch
             {
                 ParameterMode.Immediate => Value,
-                ParameterMode.Position => opCodes[opCodes[offset]]
+                ParameterMode.Position => opCodes[opCodes[offset]],
+                _ => throw new Exception()
             };
     }
 }

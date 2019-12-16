@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,8 +17,35 @@ namespace Console.Day11
 
         public static int PartA()
         {
+            return Paint(0).Count;
+        }
+
+        public static void PartB()
+        {
+            var painted = Paint(1);
+            using (var stream = File.OpenWrite("img.png"))
+            using (var image = new Image<Rgba32>(painted.Keys.Max(x => x.Item1), painted.Keys.Max(x => x.Item2)))
+            {
+                for (int i = 0; i < image.Width; i++)
+                    for (int j = 0; j < image.Height; j++)
+                    {
+                        image[i, j] = Rgba32.Black;
+                    }
+
+                foreach(var panel in painted)
+                {
+                    image[panel.Key.Item1, panel.Key.Item2] = panel.Value == Color.Black ? Rgba32.Black : Rgba32.White;
+                }
+
+                image.SaveAsPng(stream);
+            }
+
+        }
+
+        public static Dictionary<(int,int), Color> Paint(int input)
+        {
             var painted = new Dictionary<(int, int), Color>();
-            var computer = new IntCodeComputer(ReadOpCodes, 0);
+            var computer = new IntCodeComputer(ReadOpCodes, input);
             var (x, y) = (0, 0);
             var currentOrientation = Orientation.Up;
             while (true)
@@ -26,7 +55,7 @@ namespace Console.Day11
 
                 var color = (Color)computer.Output.Dequeue();
                 var direction = (Direction)computer.Output.Dequeue();
-                painted.Add((x, y), color);
+                painted[(x, y)] = color;
 
                 if (direction == Direction.Left)
                 {
@@ -82,11 +111,8 @@ namespace Console.Day11
                     computer.Input.Enqueue((long)painted[(x, y)]);
                 else computer.Input.Enqueue((long)Color.Black);
             }
-            return painted.Count;
-        }
 
-        public static void PartB()
-        {
+            return painted;
         }
 
     }
