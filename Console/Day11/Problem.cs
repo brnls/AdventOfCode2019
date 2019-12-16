@@ -23,8 +23,10 @@ namespace Console.Day11
         public static void PartB()
         {
             var painted = Paint(1);
+            var maxWidth = painted.Keys.Max(x => x.Item1);
+            var maxHeight = painted.Keys.Max(x => x.Item2);
             using (var stream = File.OpenWrite("img.png"))
-            using (var image = new Image<Rgba32>(painted.Keys.Max(x => x.Item1), painted.Keys.Max(x => x.Item2)))
+            using (var image = new Image<Rgba32>(maxWidth, maxHeight))
             {
                 for (int i = 0; i < image.Width; i++)
                     for (int j = 0; j < image.Height; j++)
