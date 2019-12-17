@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Console
+namespace Console.Day3
 {
     class Day3
     {
