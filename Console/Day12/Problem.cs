@@ -22,6 +22,26 @@ namespace Console.Day12
 
         public static void PartB()
         {
+            var cycleX = FindCycle(MoonParts.FromMoons(DeathStar.AlliInput, coordinate => coordinate.X));
+            System.Console.WriteLine(cycleX);
+            var cycleY = FindCycle(MoonParts.FromMoons(DeathStar.AlliInput, coordinate => coordinate.Y));
+            System.Console.WriteLine(cycleY);
+            var cycleZ = FindCycle(MoonParts.FromMoons(DeathStar.AlliInput, coordinate => coordinate.Z));
+            System.Console.WriteLine(cycleZ);
+        }
+
+        public static int FindCycle(MoonParts moonParts)
+        {
+            var visited = new HashSet<MoonParts> { moonParts };
+            int stepsTaken = 0;
+            while (true)
+            {
+                moonParts.ApplyGravity();
+                moonParts.ApplyVelocity();
+                stepsTaken++;
+                if(!visited.Add(moonParts)) break;
+            }
+            return stepsTaken;
         }
 
     }
