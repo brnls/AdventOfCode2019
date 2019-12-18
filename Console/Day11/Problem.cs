@@ -23,20 +23,21 @@ namespace Console.Day11
         public static void PartB()
         {
             var painted = Paint(1);
-            var maxWidth = painted.Keys.Max(x => x.Item1);
-            var maxHeight = painted.Keys.Max(x => x.Item2);
+            var adjusted = painted.Keys.Select(x => ((x.Item1 + 50), (x.Item2 + 50)));
+            var maxWidth = adjusted.Max(x => x.Item1);
+            var maxHeight = adjusted.Max(x => x.Item2);
             using (var stream = File.OpenWrite("img.png"))
             using (var image = new Image<Rgba32>(maxWidth, maxHeight))
             {
-                for (int i = 0; i < image.Width; i++)
-                    for (int j = 0; j < image.Height; j++)
+                for (int i = 0; i < maxWidth; i++)
+                    for (int j = 0; j < maxHeight; j++)
                     {
                         image[i, j] = Rgba32.Black;
                     }
 
                 foreach(var panel in painted)
                 {
-                    image[panel.Key.Item1, panel.Key.Item2] = panel.Value == Color.Black ? Rgba32.Black : Rgba32.White;
+                    image[panel.Key.Item1 + 50, panel.Key.Item2 + 50] = panel.Value == Color.Black ? Rgba32.Black : Rgba32.White;
                 }
 
                 image.SaveAsPng(stream);
