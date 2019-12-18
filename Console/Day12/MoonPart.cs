@@ -61,6 +61,14 @@ namespace Console.Day12
             return hash;
         }
 
+        public MoonParts Copy()
+        {
+            return new MoonParts
+            {
+                Positions = Positions.ToArray(),
+                Velocities = Velocities.ToArray()
+            };
+        }
         public static MoonParts FromMoons(DeathStar[] moons, Func<Vector, int> getCoordinate)
         {
             var positions = new int[4];
@@ -78,5 +86,6 @@ namespace Console.Day12
                 Velocities = velocities
             };
         }
+
     }
 }

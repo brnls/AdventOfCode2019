@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using MathNet.Numerics;
 
 namespace Console.Day12
 {
@@ -12,7 +13,7 @@ namespace Console.Day12
     {
         public static int PartA()
         {
-            var input = DeathStar.AlliInput;
+            var input = DeathStar.BrianInput;
             for (int i = 0; i < 1000; i++)
             {
                 DeathStar.RunTimeStep(input);
@@ -22,26 +23,30 @@ namespace Console.Day12
 
         public static void PartB()
         {
-            var cycleX = FindCycle(MoonParts.FromMoons(DeathStar.AlliInput, coordinate => coordinate.X));
+            var cycleX = FindCycle(MoonParts.FromMoons(DeathStar.BrianInput, coordinate => coordinate.X));
             System.Console.WriteLine(cycleX);
-            var cycleY = FindCycle(MoonParts.FromMoons(DeathStar.AlliInput, coordinate => coordinate.Y));
+            var cycleY = FindCycle(MoonParts.FromMoons(DeathStar.BrianInput, coordinate => coordinate.Y));
             System.Console.WriteLine(cycleY);
-            var cycleZ = FindCycle(MoonParts.FromMoons(DeathStar.AlliInput, coordinate => coordinate.Z));
+            var cycleZ = FindCycle(MoonParts.FromMoons(DeathStar.BrianInput, coordinate => coordinate.Z));
             System.Console.WriteLine(cycleZ);
+            System.Console.Write(Euclid.LeastCommonMultiple(cycleX, cycleY, cycleZ));
         }
 
         public static int FindCycle(MoonParts moonParts)
         {
-            var visited = new HashSet<MoonParts> { moonParts };
+            var visited = new Dictionary<MoonParts, int>();
+            visited[moonParts] = 0;
             int stepsTaken = 0;
+            MoonParts current = moonParts;
             while (true)
             {
-                moonParts.ApplyGravity();
-                moonParts.ApplyVelocity();
+                current = current.Copy();
+                current.ApplyGravity();
+                current.ApplyVelocity();
                 stepsTaken++;
-                if(!visited.Add(moonParts)) break;
+                if (!visited.ContainsKey(current)) visited[current] = stepsTaken;
+                else return stepsTaken - visited[current];
             }
-            return stepsTaken;
         }
 
     }
